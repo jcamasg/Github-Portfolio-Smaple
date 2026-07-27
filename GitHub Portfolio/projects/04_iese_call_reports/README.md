@@ -1,6 +1,6 @@
 # U.S. Call Reports Panel Construction
 
-**Author: Jose Camas Garrdiow**
+**Author: Jose Camas Garrido**
 
 An independent R/SAS research project from work on U.S. banking data at IESE
 Business School. The R Markdown notebook documents the complete construction of
