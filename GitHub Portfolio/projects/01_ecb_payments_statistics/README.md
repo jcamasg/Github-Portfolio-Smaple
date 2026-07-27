@@ -1,6 +1,6 @@
 # Payments Statistics Production System
 
-**Author: Jose Camas Garrdiow**
+**Author: Jose Camas Garrido**
 
 An independent, synthetic project built for a payments-statistics research
 position. It recreates the end-to-end work behind a quarterly official-
