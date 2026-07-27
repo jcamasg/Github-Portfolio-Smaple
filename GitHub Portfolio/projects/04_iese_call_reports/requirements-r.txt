@@ -1,0 +1,9 @@
+tidyverse
+readr
+readxl
+data.table
+lubridate
+purrr
+knitr
+kableExtra
+rmarkdown

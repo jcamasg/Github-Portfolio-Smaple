@@ -1,0 +1,1114 @@
+---
+title: "Call Reports: Reproducible Bank-Level Panel Construction"
+author: "Jose Camas Garrdiow"
+date: "2024-06-14"
+output: 
+  html_document:
+    theme: readable
+    number_sections: true
+    df_print: paged
+    code_folding: hide
+    highlight: tango
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    toc_collapsed: true
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readr)
+library(readxl)
+```
+
+
+
+# Introduction
+
+This research notebook documents a bank-level panel construction workflow based on U.S. regulatory Call Reports. It is included as a portfolio reconstruction of research assistance performed at IESE Business School. The repository does not redistribute WRDS extracts or any licensed input data; users must supply the source files described below.
+
+The data used in Chakraborty et al. (2020) are cleaned and prepared for analysis. The original extract was obtained through the _Wharton Research Data Services (WRDS)_ platform, specifically from the `SAS Studio` portal, and corresponds to the _Call Reports_ of the _Federal Deposit Insurance Corporation (FDIC)_.
+
+The original source and the replication code was taken from [Phillipp Schnabl's NYU personal website](https://pages.stern.nyu.edu/~pschnabl/), as it is explained [here](https://pages.stern.nyu.edu/~pschnabl/data/data_callreport.htm). The code was later modified to retrieve the raw data from 2005Q4 to 2012Q4, as it is shown in the following chunk:
+
+
+```{sas, eval=FALSE}
+/* SAS Code STARTS HERE */
+
+
+options linesize=250;
+libname mylib "~/"; 
+
+/*This process loops through all call report files and selects the variables*/
+%macro loop(start_month=, stop_month=);
+    %local month;
+    %do month=&start_month %to &stop_month %by 3;
+        %put Month: &month;
+
+        data call&month (keep= RSSD9001 RSSD9010 RSSD9348 RSSD9999 RSSD9048
+        RCFD2170
+        RCON2170
+        
+        RCFD3210	/* equity*/
+        RCON3210
+        
+        RCFD8639 /* available until 200903 */
+        RCON8639
+       
+        RCFDG379 /* available since 200906 - Residential mortgage pass-through securities issued or guaranteed by FNMA, FHLMC,
+or GNM */ 
+        RCONG379
+        
+        RCFDG380 /* available since 200906 - Other residential MBS issued or guaranteed by U.S. Government
+agencies or sponsored agencies */ 
+        RCONG380
+        
+        RCFDG381 /* available since 200906 -  All other residential M */ 
+        RCONG381
+        RCFDK197 /*  available since 201103 - Commercial MBS issued or guaranteed by U.S. Government agencies or sponsored
+agencies */
+        RCONK197
+        RCFDK198 /*available since 201103 -  All other commercial MBS*/
+        RCONK198
+        RCFD8641 /* available until 201012 */
+        RCON8641
+        
+        RCFD0211
+        RCON0211
+        RCFD1287
+        RCON1287
+        RCON3531
+        RCFD1289
+        RCON1289
+        RCFD1294 
+        RCON1294
+        RCFD1293
+        RCON1293
+        RCFD1298
+        RCON1298
+        RCON3532
+        RCFD1766
+        RCON1766
+        RCFDF614
+        
+        RCONF614
+        
+        RIAD4012
+        RIAD4170 /* available until 201012 */
+        
+        RCFD2200
+        RCON2200
+        
+        RCFD0010
+        RCON0010
+        
+        RCFD2122
+        RCON2122
+        
+        RCFD2210
+        RCON2210
+        
+        RIAD4340 /* netincome */
+        
+        RIADB493
+        RCON2746
+        RCFD2746
+        RCON1564
+        RCON1975
+        RCON1480
+        RCON3816
+
+        /* added variables 31.08 */
+        rcon1763
+        rcon1764
+        rcon2008
+        rconb538
+        rconb539
+        rcon2011
+        rconk137
+        rconk207
+        rcon2182
+        rconf162
+        rcon2183
+        rconf163
+        rcon4301
+        rcon4340
+        rcon4460
+        rcon8274
+        rcoa8274
+        rcon5479
+        rcon3247
+        rcon7204
+        rcon3000
+        rcon3284
+        rcon1415
+        RCONF158
+        RCONF159
+        RCON1420
+        RCON1460
+        RCON1797
+        RCON1798
+        RCON5367
+        RCON5368
+        RCON2081
+        RCON1545
+        rcon0383
+        rcon0384
+        rcon0387
+        rcon3533
+        rcon9802
+        rcop2200
+        rcon4073
+        rcon4074
+        rcon4079
+        rcon4107
+        rcon2309
+        rssd9005
+        rssd9007
+        rssd9008
+        rssd9016
+        rssd9017
+        rssd9030
+        rssd9031
+        rssd9032
+        rssd9037
+        rssd9038
+        rssd9039
+        rssd9040
+        rssd9042
+        rssd9043
+        rssd9044
+        rssd9045
+        rssd9047
+        rssd9046
+        rssd9049
+        rssd9051
+        rssd9052
+        rssd9053
+        rssd9054
+        rssd9055
+        rssd9056
+        rssd9057
+        rssd9059
+        rssd9061
+        rssd9074
+        rssd9101
+        rssd9130
+        rssd9950
+        rssd9150
+        rssd9161
+        rssd9200
+        rssd9210
+        rssd9213
+        rssd9217
+        rssd9241
+        rssd9331
+        rssd9349
+        rssd9375
+        rssd9425
+        rssd9397
+        );
+        set bank.call&month;
+    run;
+
+    %if %substr(&month,5,2)=12 %then %let month=%eval(&month+88);
+    %end;
+%mend loop;
+%loop(start_month=199012,stop_month=202012)
+
+data db;
+     set call:; /*Merging all datasets starting by bhcf in one called temp */
+     /*rename RSSD9999=date RSSD9001 = rssdid RSSD9010 = name RSSD9348 = bhcid RSSD9048 = chartype;*/
+run;
+
+data db(compress=yes);
+      set db; 
+run;
+
+proc export data=db 
+    outfile="~/chakraborty2022_rawdb_2.csv" 
+    dbms=csv 
+    replace;
+run;
+
+```
+
+
+
+After that, the file `chakraborty2022_rawdb_2.csv` was downloaded and saved in the `DataWRDS/ReplicationChakraborty2020` folder. 
+
+The following string reads the data and shows the first rows of the dataset:
+
+```{r paths}
+project_dir <- normalizePath(
+  Sys.getenv("CALL_REPORTS_PROJECT_DIR", unset = "."),
+  mustWork = FALSE
+)
+data_dir <- file.path(project_dir, "data", "raw")
+output_dir <- file.path(project_dir, "outputs")
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+```
+
+```{r}
+calls_original <- read.csv(
+  file.path(data_dir, "chakraborty2022_rawdb_2.csv")
+)
+head(calls_original)
+```
+
+Note that the information is expressed in thousands of dollars.
+
+# Data cleaning
+
+The following chunk of code cleans the data and prepares it for the analysis. The main steps are:
+
+1. Convert the RSSD9999 variable to a date format.
+2. Arrange the data by RSSD9001 and date.
+3. Create a variable `quarter` that indicates the quarter of the year.
+4. Create a variable `delta` that indicates the difference between the quarter and the first quarter of the year.
+5. Create a variable `diff_delta` that indicates the difference between the current `delta` and the previous `delta`.
+6. Replace missing values in the `RCFD` series with the `RCON` series. (This is because starting from 20110331, banks without foreign offices do not report RCFD series)
+7. Create quarterly variables for the income statement due to those variables (`RIAD`) are reported from year to date (on a cumulative basis, that is earnings in Q2 are the sum of Q1 and Q2 earnings, etc.)
+8. Finally, according to the authors, there are some cases were the same data was reported for the same bank in the same quarter. In those cases, the observation with the less amount of assets is dropped.
+
+All those steps are performed in the following chunk of code:
+
+```{r}
+calls <- calls_original |> 
+  mutate(date = lubridate::ymd(RSSD9999)) |> #create date
+  arrange(RSSD9001,date) |>
+  mutate(
+    quarter = lubridate::quarter(date),
+    delta = quarter*25,
+    diff_delta = delta - dplyr::lag(delta),
+    # Starting from 20110331, banks without foreign offices do not report RCFD series. 
+    # This process replaces the missing RCFD values with RCON values
+    (across(starts_with("RCFD"), 
+            ~case_when(
+              is.na(.) ~  get(paste0("RCON", sub("RCFD", "", cur_column()))),
+              TRUE ~ .),
+            .names = "{.col}")),
+    (across(starts_with('RIAD'),
+            ~ case_when(
+              quarter == 1 ~ .,
+              quarter != 1 & diff_delta == 25 ~ . - dplyr::lag(.),
+              TRUE ~ NA_real_),
+            .names = "{.col}"))
+  ) |> 
+  # There are some banks that were repeated, the following code removes the duplicates
+  arrange(RSSD9001, date, desc(RCFD2170)) |>
+  distinct(RSSD9001,date, .keep_all = TRUE)
+```
+
+
+## 1. VISUALIZATION. COMPARISON DATASET-OTHER SOURCES
+
+
+### Assets
+
+First, let's plot the assets over time:
+
+```{r}
+calls |>
+  group_by(date) |>
+  summarise(RCFD2170 = sum(RCFD2170/1000000000, na.rm = T)) |>
+  ggplot(aes(x = date, y = RCFD2170)) +
+  geom_line(linewidth= 1) +
+  labs(title = "Assets over time",
+       x = "Date",
+       y = "Assets (in trillions of dollars)")
+
+```
+Even though the plot is very clear, there is a huge drop in the assets in 2013. In the following plot the information is broken down by type of entity:
+
+
+```{r 'assetsbytype', fig.width=14, fig.height=9, message=FALSE}
+calls |> 
+  mutate(entity_type = case_when(
+    RSSD9048 == 0 ~ 'NA or not applicable (for branches)',
+    RSSD9048 == 100 ~ 'Government',
+    RSSD9048 == 110 ~ 'Government Agency ',
+    RSSD9048 == 120 ~ 'Overseeing Regulatory Body',
+    RSSD9048 == 130 ~ 'U.S. Central Bank or Liquidity Agency',
+    RSSD9048 == 200 ~ 'Commercial Bank ',
+    RSSD9048 == 250 ~ 'Nondeposit Trust Company',
+    RSSD9048 == 300 ~ 'Savings Bank',
+    RSSD9048 == 310 ~ 'Savings & Loan Association',
+    RSSD9048 == 320 ~ 'Cooperative Bank',
+    RSSD9048 == 330 ~ 'Credit Union (excluding Corporates)',
+    RSSD9048 == 340 ~ 'Industrial Bank ',
+    RSSD9048 == 350 ~ 'Article XII New York Investment Company',
+    RSSD9048 == 370 ~ 'Corporate Credit Union',
+    RSSD9048 == 400 ~ 'Edge or Agreement Corporation',
+    RSSD9048 == 500 ~ 'Holding Company only, not itself any other charter type (not necessarily a BHC)',
+    RSSD9048 == 550 ~ 'Insurance Broker or Agent and/or Insurance Company (includes insurance underwriting)',
+    RSSD9048 == 610 ~ 'Employee Stock Ownership Plan/Trust (ESOP or ESOT)',
+    RSSD9048 == 700 ~ 'Securities Broker and/or Dealer (includes securities underwriting)',
+    RSSD9048 == 710 ~ 'Utility Company or Electric Power Co-generator',
+    RSSD9048 == 720 ~ 'Other Non Depository Institution',
+    RSSD9048 == 800 ~ 'Pseudo Entity / Accounting',
+    RSSD9048 == 810 ~ 'Currency, Verification, Counting and Sorting Machine',
+    RSSD9048 == 820 ~ 'Direct Mint Shipment Site, not itself any other entity type',
+    RSSD9048 == 900 ~ 'Individual or Group of Individuals',
+    TRUE ~ 'Other'
+  )) |> 
+  select(date,entity_type,RSSD9001,RCFD2170 ) |> 
+#  filter(RSSD9001 == 1511) |> 
+  group_by(date,entity_type) |>
+  summarise(across(starts_with("RCFD"), list('sum'= ~sum(., na.rm=T)))) |>
+  ggplot(aes(x=date, y=RCFD2170_sum/1000000000)) +
+  #geom_rect(aes(xmin = ymd('2007-11-27'), xmax = ymd('2009-05-27'), ymin = -Inf, ymax = Inf), fill = 'gray90', alpha = 0.2, inherit.aes = FALSE) +
+  geom_line(linewidth = 1) + 
+  #theme_minimal()+
+  facet_wrap(~entity_type, scales = 'free_y')+
+  #scale_color_brewer(palette = 'Set2') +
+  labs(title='Time series of total assets by entity type',
+       x='Date',
+       y='Value (trillions)') +
+  scale_x_date(date_labels = '%Y-%m', date_breaks = '1 year')+
+  theme(legend.position = 'bottom', 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(lubridate)
+
+commercial_banks_plot <- calls %>%
+  filter(RSSD9048 == 200) %>%
+  group_by(date) %>%
+  summarise(assets = sum(RCFD2170 / 1000000000, na.rm = TRUE)) %>%
+  ggplot(aes(x = date, y = assets)) +
+  geom_line(linewidth = 1, color = "#2c7bb6") +  # Adjusted color to match FRED style
+  labs(title = 'Total Assets, All Commercial Banks',
+       x = NULL,
+       y = 'Billions of U.S. Dollars') +
+  scale_x_date(date_labels = '%Y-%m', date_breaks = '1 year', expand = c(0, 0)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.title = element_text(size = 14, face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+  )
+
+print(commercial_banks_plot)
+```
+
+It seems that the drop in assets is mainly due to the lack of reporting of _Edge or Agreement Corporation_ and _NA or not applicable (for branches)_ entities, even tough there is a sharp increase in the _Saving Bank_ and _Savings & Loan Association_ entities.
+
+Also, as it can be seen from the image below, the assets of the _Commercial Bank_ entities match the data published by the St. Louis Federal Reserve (FRED) [here](https://fred.stlouisfed.org/series/USTAST).
+
+
+### Equity
+
+The following plot shows the equity over time:
+
+```{r}
+calls |>
+  group_by(date) |>
+  summarise(RCFD3210 = sum(RCFD3210/1000000000, na.rm = T)) |>
+  ggplot(aes(x = date, y = RCFD3210)) +
+  geom_line(linewidth= 1) +
+  labs(title = "Equity over time",
+       x = "Date",
+       y = "Equity (in trillions of dollars)")
+
+```
+
+Now, let's break down the equity by entity type:
+
+```{r 'equitybytype', fig.width=14, fig.height=9, message=FALSE}
+calls |> 
+  mutate(entity_type = case_when(
+    RSSD9048 == 0 ~ 'NA or not applicable (for branches)',
+    RSSD9048 == 100 ~ 'Government',
+    RSSD9048 == 110 ~ 'Government Agency ',
+    RSSD9048 == 120 ~ 'Overseeing Regulatory Body',
+    RSSD9048 == 130 ~ 'U.S. Central Bank or Liquidity Agency',
+    RSSD9048 == 200 ~ 'Commercial Bank ',
+    RSSD9048 == 250 ~ 'Nondeposit Trust Company',
+    RSSD9048 == 300 ~ 'Savings Bank',
+    RSSD9048 == 310 ~ 'Savings & Loan Association',
+    RSSD9048 == 320 ~ 'Cooperative Bank',
+    RSSD9048 == 330 ~ 'Credit Union (excluding Corporates)',
+    RSSD9048 == 340 ~ 'Industrial Bank ',
+    RSSD9048 == 350 ~ 'Article XII New York Investment Company',
+    RSSD9048 == 370 ~ 'Corporate Credit Union',
+    RSSD9048 == 400 ~ 'Edge or Agreement Corporation',
+    RSSD9048 == 500 ~ 'Holding Company only, not itself any other charter type (not necessarily a BHC)',
+    RSSD9048 == 550 ~ 'Insurance Broker or Agent and/or Insurance Company (includes insurance underwriting)',
+    RSSD9048 == 610 ~ 'Employee Stock Ownership Plan/Trust (ESOP or ESOT)',
+    RSSD9048 == 700 ~ 'Securities Broker and/or Dealer (includes securities underwriting)',
+    RSSD9048 == 710 ~ 'Utility Company or Electric Power Co-generator',
+    RSSD9048 == 720 ~ 'Other Non Depository Institution',
+    RSSD9048 == 800 ~ 'Pseudo Entity / Accounting',
+    RSSD9048 == 810 ~ 'Currency, Verification, Counting and Sorting Machine',
+    RSSD9048 == 820 ~ 'Direct Mint Shipment Site, not itself any other entity type',
+    RSSD9048 == 900 ~ 'Individual or Group of Individuals',
+    TRUE ~ 'Other'
+  )) |> 
+  select(date,entity_type,RSSD9001,RCFD3210 ) |>
+  group_by(date,entity_type) |>
+  summarise(across(starts_with("RCFD"), list('sum'= ~sum(., na.rm=T)))) |>
+  ggplot(aes(x=date, y=RCFD3210_sum/1000000000)) +
+  #geom_rect(aes(xmin = ymd('2007-11-27'), xmax = ymd('2009-05-27'), ymin = -Inf, ymax = Inf), fill = 'gray90', alpha = 0.2, inherit.aes = FALSE) +
+  geom_line(linewidth = 1) +
+  facet_wrap(~entity_type, scales = 'free_y')+
+  labs(title='Time series of equity by entity type',
+       x='Date',
+       y='Value (trillions of USD)') +
+  scale_x_date(date_labels = '%Y-%m', date_breaks = '1 year')+
+  theme(legend.position = 'bottom', 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+The same pattern is observed in the equity time series, with the _Edge or Agreement Corporation_ entities not reporting their equity.
+
+
+### Net income
+
+The following plot shows the net income over time for the raw data:
+
+```{r}
+calls_original |> 
+  mutate(date = lubridate::ymd(RSSD9999)) |> 
+  group_by(date) |>
+  summarise(RIAD4340 = sum(RIAD4340/1000000000, na.rm = T)) |>
+  ggplot(aes(x = date, y = RIAD4340)) +
+  geom_line(linewidth= 1) +
+  labs(title = "Net income over time",
+       x = "Date",
+       y = "Net income (in billions of dollars)")
+
+```
+
+The previous plot shows the year to date net income for the raw data. As the income is cumulative, the plot shows a clear increasing trend over the year. However, the following plot shows the net income over time for the cleaned data:
+
+```{r}
+calls |>
+  filter(date >= dmy(01012006)) |> 
+  group_by(date) |>
+  summarise(RIAD4340 = sum(RIAD4340/1000000000, na.rm = T)) |>
+  ggplot(aes(x = date, y = RIAD4340)) +
+  geom_line(linewidth= 1) +
+  labs(title = "Net income over time",
+       subtitle = "Net income for 2005q4 was removed for plotting because it showed a cumulative value.",
+       x = "Date",
+       y = "Net income (in billions of dollars)")
+
+```
+
+Now the series is plotted by entity type:
+
+```{r 'netincomebytype', fig.width=14, fig.height=9, message=FALSE}
+
+calls |> 
+  filter(date >= dmy(01012006)) |>
+  mutate(entity_type = case_when(
+    RSSD9048 == 0 ~ 'NA or not applicable (for branches)',
+    RSSD9048 == 100 ~ 'Government',
+    RSSD9048 == 110 ~ 'Government Agency ',
+    RSSD9048 == 120 ~ 'Overseeing Regulatory Body',
+    RSSD9048 == 130 ~ 'U.S. Central Bank or Liquidity Agency',
+    RSSD9048 == 200 ~ 'Commercial Bank ',
+    RSSD9048 == 250 ~ 'Nondeposit Trust Company',
+    RSSD9048 == 300 ~ 'Savings Bank',
+    RSSD9048 == 310 ~ 'Savings & Loan Association',
+    RSSD9048 == 320 ~ 'Cooperative Bank',
+    RSSD9048 == 330 ~ 'Credit Union (excluding Corporates)',
+    RSSD9048 == 340 ~ 'Industrial Bank ',
+    RSSD9048 == 350 ~ 'Article XII New York Investment Company',
+    RSSD9048 == 370 ~ 'Corporate Credit Union',
+    RSSD9048 == 400 ~ 'Edge or Agreement Corporation',
+    RSSD9048 == 500 ~ 'Holding Company only, not itself any other charter type (not necessarily a BHC)',
+    RSSD9048 == 550 ~ 'Insurance Broker or Agent and/or Insurance Company (includes insurance underwriting)',
+    RSSD9048 == 610 ~ 'Employee Stock Ownership Plan/Trust (ESOP or ESOT)',
+    RSSD9048 == 700 ~ 'Securities Broker and/or Dealer (includes securities underwriting)',
+    RSSD9048 == 710 ~ 'Utility Company or Electric Power Co-generator',
+    RSSD9048 == 720 ~ 'Other Non Depository Institution',
+    RSSD9048 == 800 ~ 'Pseudo Entity / Accounting',
+    RSSD9048 == 810 ~ 'Currency, Verification, Counting and Sorting Machine',
+    RSSD9048 == 820 ~ 'Direct Mint Shipment Site, not itself any other entity type',
+    RSSD9048 == 900 ~ 'Individual or Group of Individuals',
+    TRUE ~ 'Other'
+  )) |> 
+  select(date,entity_type,RIAD4340 ) |>
+  group_by(date,entity_type) |>
+  summarise(across(starts_with("RIAD"), list('sum'= ~sum(., na.rm=T)))) |>
+  ggplot(aes(x=date, y=RIAD4340_sum/1000000)) +
+  geom_line(linewidth = 1) +
+  facet_wrap(~entity_type, scales = 'free_y')+
+  labs(title='Time series of net income by entity type',
+       x='Date',
+       y='Value (billions of USD)') +
+  scale_x_date(date_labels = '%Y-%m', date_breaks = '1 year')+
+  theme(legend.position = 'bottom', 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+___________________________________________________________________________________________________________________________________________________________________
+
+
+## F2. FINAL DATASET
+
+We took into account the dataset from Chakraborty but in that dataset there are not granular variables for deposit. In order to have a deeper understanding of sourcing, we merge these data with a dataset used in Schnabl's papers "The deposits channel of monetary policy" and "Banking on Deposits: Maturity Transformation without Interest Rate Risk", following the instructions from the website https://pages.stern.nyu.edu/~pschnabl/data/data_callreport.htm. Both dataset are retrieved from the same WRDS source, but Schnabl's data are wider in terms of interval and include more variables. The following is the code that was used to create the final dataset, which can be eventually replicated, whenever necessary with other variables. 
+
+
+# Step 1: Convert the date column in callreports_1976_2020_WRDS to date format yyyy-mm-dd
+``{r}
+callreports <- read.csv(
+  file.path(data_dir, "callreports_1976_2020_WRDS.csv")
+)
+library(data.table)
+
+setDT(calls)
+setDT(callreports)
+
+callreports[, date := as.Date(as.character(date), format = "%Y%m%d")]
+
+# Step 2: Select the relevant variables from callreports_1976_2020_WRDS
+selected_columns <- c("date", "rssdid", "brokereddeple100k", "brokereddepeq100k", "qavgsavdep", 
+                      "qavgtimedepge100k", "qavgtimedepge250k", "qavgcdge100k", 
+                      "qavgtimedeple100k", "qavgtimedeple250k", "qavgfordep", 
+                      "timedeple100k_less_3m", "timedeple250k_less_3m", "timedeple100k_3m_1y", 
+                      "timedeple250k_3m_1y", "timedeple100k_1y_3y", "timedeple250k_1y_3y", 
+                      "timedeple100k_over_3y", "timedeple250k_over_3y", "timedeple100k_less_1y", 
+                      "timedeple250k_less_1y", "timedepge100k_less_3m", "timedepge250k_less_3m", 
+                      "timedepge100k_3m_1y", "timedepge250k_3m_1y", "timedepge100k_1y_3y", 
+                      "timedepge250k_1y_3y", "timedepge100k_over_3y", "timedepge250k_over_3y")
+
+# Additional columns
+additional_columns <- c(
+  "reloans", "persloans", "agloans",
+  "loansnet", "tradingassets",
+  "securitiesheldtomaturity", "securitiesavailableforsale", "deposits", "foreigndep", "nonintbeardep", 
+  "intbeardep", "intbearfordep",
+  "timedepuninsured",
+  "intexp", "intincnet", "nonintinc", "domdepservicecharges", "nonintexp",
+  "numemployees", "intexpalldep",
+  "intexpdomdep", "intexpsubordinated", "intanddivincsecurities", "loanleaselossprovision", 
+  "intexptimedepge100k", "intexptimedeple100k", "intexptimedeple250k", "intexptimedepge250k", 
+  "intexpcdge100k", "intexptimedep",
+  "intincloans", "intincreloans",
+  "resloans_less_3m", "resloans_3m_1y", "resloans_1y_3y", "resloans_3y_5y", "resloans_5y_15y", 
+  "resloans_over_15y"
+)
+
+# Combine and remove duplicates
+selected_columns <- unique(c(selected_columns, additional_columns))
+```
+
+
+``{r}
+callreports_selected <- callreports[, ..selected_columns]
+```
+
+``{r}
+# Convert the date columns to Date format
+calls$date <- as.Date(calls$date)
+callreports_selected$date <- as.Date(callreports_selected$date)
+
+merged_data <- calls %>%
+  inner_join(callreports_selected, by = c("date" = "date", "RSSD9001" = "rssdid"))
+
+```
+
+``{r}
+write.csv(
+  merged_data,
+  file.path(output_dir, "final_dataset.csv"),
+  row.names = FALSE
+)
+```
+
+___________________________________________________________________________________________________________________________________________________________________
+
+## 3. CHACKRABORTY CONSISTENCY 
+
+### Replicating summary statistics
+
+The table it is aimed to replicate is Table 1 from Chackraborty (2020), whose variables construction method is defined in Table A.1 from the appendix, which lists also the data sources.
+
+To create the necessary variables, we started by loading the required dataset and libraries. We then used the mutate function from the dplyr package to generate each variable according to the specified formulas. This involved calculating values like MBS holdings, securities holdings, U.S. government securities holdings, C&I loan growth, change in C&I loan profitability, bank size, bank equity ratio, bank net income, bank cost of deposits, and bank demand deposits. Each new variable was scaled appropriately and based on the provided dataset columns.
+
+
+```{r}
+# Ensure the date column is in date format and filter the data
+calls <- calls %>%
+    filter(date >= as.Date("1990-12-31") & date <= as.Date("2020-12-31"))
+
+calls <- calls %>%
+  mutate(across(everything(), ~replace_na(., 0)))
+
+calls <- calls %>%
+  mutate(
+    MBS_Holdings = ((RCFD8639 + RCFDG379 + RCFDG380 + RCFDG381 + RCFDK197 + RCFDK198) / RCFD2170) * 100,
+    Securities_Holdings = ((RCFD8641 - RCFD8639) / RCFD2170) * 100,
+    US_Gov_Securities_Holdings = ((RCFD0211 + RCFD1287 + RCON3531 + RCFD1289 + RCFD1294 + RCFD1293 + RCFD1298 + RCON3532) / RCFD2170) * 100,
+    C_I_Loan_Growth = (((RCFD1766 + RCFDF614) / lag(RCFD1766 + RCFDF614)) - 1) * 100,
+    Change_in_C_I_Loan_Profitability = (((RIAD4012 / RCFD1766) - lag(RIAD4012 / RCFD1766)) * 100),
+    Bank_Size = log(RCFD2170),
+    Bank_Equity_Ratio = ((RCFD3210 / RCFD2170) * 100),
+    Bank_Net_Income = ((RIAD4340 / RCFD2170) * 100),
+    Bank_Cost_of_Deposits = ((RIAD4170 / RCFD2200) * 100),
+    Bank_Demand_Deposits = ((RCFD2210 / RCFD2170) * 100)
+  )
+
+# sum(!is.na(calls$MBS_Holdings))
+
+# sum(!is.na(calls$RCFD2170) & calls$RCFD2170 != 0)
+
+```
+
+For calculating summary statistics, we utilized the summarise function from the dplyr package. This function helped us compute the mean, standard deviation, 25th percentile, median, and 75th percentile for each of the newly created variables. We ensured that all calculations excluded any missing values by using the na.rm = TRUE parameter. These summary statistics provide a comprehensive overview of the distribution and central tendencies of the bank variables, which are essential for further analysis and reporting.
+
+```{r}
+
+# Load necessary libraries
+library(dplyr)
+library(purrr)
+library(knitr)
+library(kableExtra)
+
+# Define a Winsorizing function
+winsorize <- function(x, probs = c(0.02, 0.963)) {
+  quantiles <- quantile(x, probs, na.rm = TRUE)
+  x[x < quantiles[1]] <- quantiles[1]
+  x[x > quantiles[2]] <- quantiles[2]
+  return(x)
+}
+
+# Ensure the date column is in date format and filter the data
+calls <- calls %>%
+    filter(date >= as.Date("1990-12-31") & date <= as.Date("2020-12-31"))
+
+calls <- calls %>%
+  mutate(across(everything(), ~replace_na(., 0)))
+
+# Create new variables
+calls <- calls %>%
+  mutate(
+    MBS_Holdings = ((RCFD8639 + RCFDG379 + RCFDG380 + RCFDG381 + RCFDK197 + RCFDK198) / RCFD2170) * 100,
+    Securities_Holdings = ((RCFD8641 - RCFD8639) / RCFD2170) * 100,
+    US_Gov_Securities_Holdings = ((RCFD0211 + RCFD1287 + RCON3531 + RCFD1289 + RCFD1294 + RCFD1293 + RCFD1298 + RCON3532) / RCFD2170) * 100,
+    C_I_Loan_Growth = (((RCFD1766 + RCFDF614) / lag(RCFD1766 + RCFDF614)) - 1) * 100,
+    Change_in_C_I_Loan_Profitability = (((RIAD4012 / RCFD1766) - lag(RIAD4012 / RCFD1766)) * 100),
+    Bank_Size = log(RCFD2170),
+    Bank_Equity_Ratio = ((RCFD3210 / RCFD2170) * 100),
+    Bank_Net_Income = ((RIAD4340 / RCFD2170) * 100),
+    Bank_Cost_of_Deposits = ((RIAD4170 / RCFD2200) * 100),
+    Bank_Demand_Deposits = ((RCFD2210 / RCFD2170) * 100)
+  )
+
+# Windsorize the variables except Bank_Size
+calls <- calls %>%
+  mutate(
+    MBS_Holdings = winsorize(MBS_Holdings),
+    Securities_Holdings = winsorize(Securities_Holdings),
+    US_Gov_Securities_Holdings = winsorize(US_Gov_Securities_Holdings),
+    C_I_Loan_Growth = winsorize(C_I_Loan_Growth),
+    Change_in_C_I_Loan_Profitability = winsorize(Change_in_C_I_Loan_Profitability),
+    Bank_Equity_Ratio = winsorize(Bank_Equity_Ratio),
+    Bank_Net_Income = winsorize(Bank_Net_Income),
+    Bank_Cost_of_Deposits = winsorize(Bank_Cost_of_Deposits),
+    Bank_Demand_Deposits = winsorize(Bank_Demand_Deposits)
+  )
+
+# Define a function to compute summary statistics excluding zeros and infinite values
+summary_stats_function <- function(x) {
+  valid_x <- x[x != 0 & is.finite(x)]
+  if (length(valid_x) > 0) {
+    data.frame(
+      mean = mean(valid_x, na.rm = TRUE),
+      sd = sd(valid_x, na.rm = TRUE),
+      p25 = quantile(valid_x, 0.25, na.rm = TRUE),
+      median = median(valid_x, na.rm = TRUE),
+      p75 = quantile(valid_x, 0.75, na.rm = TRUE),
+      n = length(valid_x)
+    )
+  } else {
+    data.frame(
+      mean = NA,
+      sd = NA,
+      p25 = NA,
+      median = NA,
+      p75 = NA,
+      n = 0
+    )
+  }
+}
+
+# Compute the summary statistics for the specified variables
+summary_stats <- bind_rows(
+  MBS_Holdings = summary_stats_function(calls$MBS_Holdings),
+  Securities_Holdings = summary_stats_function(calls$Securities_Holdings),
+  US_Gov_Securities_Holdings = summary_stats_function(calls$US_Gov_Securities_Holdings),
+  C_I_Loan_Growth = summary_stats_function(calls$C_I_Loan_Growth),
+  Change_in_C_I_Loan_Profitability = summary_stats_function(calls$Change_in_C_I_Loan_Profitability),
+  Bank_Size = summary_stats_function(calls$Bank_Size),
+  Bank_Equity_Ratio = summary_stats_function(calls$Bank_Equity_Ratio),
+  Bank_Net_Income = summary_stats_function(calls$Bank_Net_Income),
+  Bank_Cost_of_Deposits = summary_stats_function(calls$Bank_Cost_of_Deposits),
+  Bank_Demand_Deposits = summary_stats_function(calls$Bank_Demand_Deposits),
+  .id = "Variable"
+)
+
+# Rename columns to match desired format
+summary_stats <- summary_stats %>%
+  rename(
+    "Mean" = mean,
+    "Standard deviation" = sd,
+    "25th percentile" = p25,
+    "Median" = median,
+    "75th percentile" = p75,
+    "Number of observations" = n
+  )
+
+# Create the table
+kable(summary_stats, "html", escape = FALSE, align = 'c') %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  add_header_above(c(" " = 1, "Summary Statistics" = 7))
+
+print(summary_stats)
+```
+
+The only value that is not giving results aligned with those from Chakraborty is related to Change in C&I Loan Profitability. All the others are pretty similar. I winsorized all the variables but Bank Size trying to minimize the problems connected with extreme values that, without winsorization were affecting especially Lean Growth.
+
+____________________________________________________________________________________________________________________________________________
+
+## 4. COMPARING BETWEEN AGGREGATED DATA AND HOLDINGS
+
+In order to retrieve the data for holding banks, I considered the dataset WRDS_HOLDING_BHCK from BANK library on SAS Studio WRDS Cloud. I filtered by the variables that we had already in the chackraborty dataset. 
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+```
+
+### LOADING AND PREPARATION
+
+```{r}
+# Read the original calls data from chakraborty raw file
+calls_original <- read.csv(
+  file.path(data_dir, "chakraborty2022_rawdb_2.csv")
+)
+
+# Load the Variables_Holders dataset
+variables_holders <- read.csv(
+  file.path(data_dir, "Variables_Holdings.csv")
+)
+
+# Convert RSSD9999 to a date format and calculate the corresponding fiscal quarter
+variables_holders <- variables_holders %>%
+  mutate(date = ymd(RSSD9999),                           # Convert RSSD9999 to proper date format
+         quarter = floor_date(date, "quarter"))          # Calculate the fiscal quarter
+
+# Load and prepare the calls data by converting date and calculating fiscal quarters
+calls <- read.csv(file.path(data_dir, "calls.csv"))
+calls <- calls %>%
+  mutate(date = ymd(date),
+         quarter = floor_date(date, "quarter"))
+```
+
+### FILTERING 
+```{r, echo=FALSE}
+# Filter both datasets for the interval 2005Q4 to 2014Q4
+start_date <- ymd("1990-12-31")
+end_date <- ymd("2020-12-31")
+
+variables_holders_filtered <- variables_holders %>%
+  filter(date >= start_date & date <= end_date)
+
+calls_filtered <- calls %>%
+  filter(date >= start_date & date <= end_date)
+```
+
+
+### AGGREGATION 
+```{r, echo=FALSE}
+# Aggregate data per quarter
+variables_holders_quarterly <- variables_holders_filtered %>%
+  group_by(quarter) %>%
+  summarise(across(starts_with("BHCK"), sum, na.rm = TRUE))
+
+calls_quarterly <- calls_filtered %>%
+  group_by(quarter) %>%
+  summarise(across(starts_with("RCFD"), sum, na.rm = TRUE),
+            across(starts_with("RIAD"), sum, na.rm = TRUE))
+
+# Merge the two aggregated datasets by quarter
+merged_data <- merge(calls_quarterly, variables_holders_quarterly, by = "quarter", all = TRUE)
+```
+
+### PLOTTING PREPARATION
+```{r, echo=FALSE}
+# Variable pairs to compare
+variable_pairs <- list(
+  c("RCFD1287", "BHCK1287", "Fair Value of AFS US Treasury Securities"),
+  c("RCFD1289", "BHCK1289", "Amortized Cost of HTM US Govt. Agency & Corp. Obligations (Excl. MBS)"),
+  c("RCFD1293", "BHCK1293", "Fair Value of AFS US Govt. Agency & Corp. Obligations (Excl. MBS)"),
+  c("RCFD1294", "BHCK1294", "Amortized Cost of HTM US Govt. Agency & Corp. Obligations (Excl. MBS)"),
+  c("RCFD1298", "BHCK1298", "Fair Value of AFS US Govt. Agency & Corp. Obligations (Excl. MBS)"),
+  c("RCFD1766", "BHCK1766", "Commercial & Industrial Loans")
+)
+
+# Function to plot comparison
+plot_comparison <- function(call_var, holder_var, title, data) {
+  p <- ggplot(data, aes(x = quarter)) +
+    geom_line(aes(y = .data[[call_var]], color = "call_report_aggregated"), size = 1.2) +
+    geom_line(aes(y = .data[[holder_var]], color = "holding_banks"), size = 1.2) +
+    labs(title = title,
+         x = "Quarter", y = "Value") +
+    scale_color_manual(name = "Source", values = c("call_report_aggregated" = "blue", "holding_banks" = "red")) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      axis.title = element_text(size = 14),
+      axis.text = element_text(size = 12),
+      legend.title = element_text(size = 14),
+      legend.text = element_text(size = 12)
+    )
+  
+  return(p)
+}
+```
+
+### PLOTTING EXECUTION
+
+```{r, echo=FALSE}
+# Plot all comparisons
+for (pair in variable_pairs) {
+  call_var <- pair[1]
+  holder_var <- pair[2]
+  title <- pair[3]
+  
+  p <- plot_comparison(call_var, holder_var, title, merged_data)
+  
+  print(p)
+}
+
+
+
+# Net income Holdings vs aggregated
+
+# Define date range
+start_date <- ymd("1990-12-31")
+end_date <- ymd("2020-12-31")
+
+# Prepare the data for RIAD4340
+riad_data <- calls_original %>%
+  mutate(date = lubridate::ymd(RSSD9999)) %>%
+  filter(date >= start_date & date <= end_date) %>%
+  group_by(date) %>%
+  summarise(RIAD4340 = sum(RIAD4340 / 1000000000, na.rm = TRUE))
+
+# Prepare the data for BHCK4340
+bhck_data <- variables_holders %>%
+  mutate(date = lubridate::ymd(RSSD9999)) %>%
+  filter(date >= start_date & date <= end_date) %>%
+  group_by(date) %>%
+  summarise(BHCK4340 = sum(BHCK4340 / 1000000000, na.rm = TRUE))
+
+# Merge the two datasets by date
+combined_data <- merge(riad_data, bhck_data, by = "date", all = TRUE)
+
+# Plot the combined data
+ggplot(combined_data, aes(x = date)) +
+  geom_line(aes(y = RIAD4340, color = "call_report_aggregated"), size = 1) +
+  geom_line(aes(y = BHCK4340, color = "holding_banks"), size = 1) +
+  labs(title = "Net Income (loss) over time (in billions)",
+       x = "Date",
+       y = "Value",
+       color = "Variable") +
+  scale_color_manual(values = c("call_report_aggregated" = "blue", "holding_banks" = "red")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12)
+  )
+
+# Net Securitization Holdings vs aggregated
+
+# Prepare the data for RIADB493
+riad_data <- calls_original %>%
+  mutate(date = lubridate::ymd(RSSD9999)) %>%
+  filter(date >= start_date & date <= end_date) %>%
+  group_by(date) %>%
+  summarise(RIADB493 = sum(RIADB493, na.rm = TRUE))
+
+# Prepare the data for BHCKB493
+bhck_data <- variables_holders %>%
+  mutate(date = lubridate::ymd(RSSD9999)) %>%
+  filter(date >= start_date & date <= end_date) %>%
+  group_by(date) %>%
+  summarise(BHCKB493 = sum(BHCKB493, na.rm = TRUE))
+
+# Merge the two datasets by date
+combined_data <- merge(riad_data, bhck_data, by = "date", all = TRUE)
+
+# Plot the combined data
+ggplot(combined_data, aes(x = date)) +
+  geom_line(aes(y = RIADB493, color = "call_report_aggregated"), size = 1) +
+  geom_line(aes(y = BHCKB493, color = "holding_banks"), size = 1) +
+  labs(title = "Net Securitization Income",
+       x = "Date",
+       y = "Value",
+       color = "Variable") +
+  scale_color_manual(values = c("call_report_aggregated" = "blue", "holding_banks" = "red")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12)
+  )
+```
+
+In these plots related to variables we could compare with holding banks data we can observe how the trends between holding bank and commercial banks aggergated seem to be consistent. We also observe that plots of data from call report aggregated commercial banks are always a bit higher, which is possible to explain considering that holdings' banks data have a certain threshold under which data are not considered. 
+
+________________________________________________________________________________________________
+
+## 5. AGGREGATING AT TOP HOLDING LEVEL
+
+In order to have aggregated data at top_holding level, we proceeded by creating a dataset that drops rssdid and bhcid, creating a new variable which is called bankid. When bhcid (which in our dataset is identified by RSSD9348) is equal to 0, it means that the bank is already a top holding (i.e. there are no banks that own that bank). When it's different from 0, the value displayed is the rssdid of the top ownwer (top holding). 
+
+```{r}
+Final_Dataset <- read.csv(file.path(data_dir, "Final_Dataset.csv"))
+```
+
+
+```{r}
+unique_bhcid_count <- Final_Dataset %>%
+  summarise(unique_count_bhcid = n_distinct(RSSD9348))
+
+print(unique_bhcid_count)
+
+unique_rssdid_count <- Final_Dataset %>%
+  summarise(unique_count_rssdid = n_distinct(RSSD9001))
+
+print(unique_rssdid_count)
+
+```
+
+# Aggregate at top holding level
+
+To create the bankid variable we considered the value in RSSD9348 itself when the columns RSSD9348 is different than 0 (therefore, we directly listed the right top holding); for RSSD9348 = 0 or NA we directly considered the rssdid, because that identifier is already the one of the top holding.
+
+```{r}
+# Create the bankid column
+data_filtered <- Final_Dataset %>%
+  mutate(bankid = if_else(RSSD9348 == 0 | is.na(RSSD9348), RSSD9001, RSSD9348))
+```
+
+```{r}
+unique_bankid_count <- data_filtered %>%
+  summarise(unique_count_bankid = n_distinct(bankid))
+
+print(unique_bankid_count)
+```
+
+A bit of cleaning to drop columns rssdid and bhcid, plus the column with the name of the subsidiaries. 
+
+```{r}
+data_filtered <- data_filtered %>%
+  select(RSSD9001, RSSD9348, RSSD9010, date, bankid, RSSD9048, everything())
+```
+
+```{r}
+data_filtered <- data_filtered[, -c(1:3,7)]
+```
+
+Once all this is done, we can finally aggregate, distinguish between numeric columns and non numeric columns. Numeric columns are related to all the financial variables included in the dataset.
+
+```{r}
+data_filtered <- data_filtered %>%
+  mutate_at(vars(4:ncol(data_filtered)), as.numeric)
+```
+
+Before the last aggregation step, we create a new dataset, called dt, which shows for chartertype the correct qualification of the bank.
+
+```{r}
+dt <- as.data.table(data_filtered)
+
+numeric_cols <- names(dt)[4:ncol(dt)]
+dt[, (numeric_cols) := lapply(.SD, as.numeric), .SDcols = numeric_cols]
+```
+
+```{r}
+dt[, RSSD9048 := as.character(RSSD9048)]
+
+# Create a lookup table for chartertype mappings
+chartertype_lookup <- c(
+  "0" = "Not_known",
+  "110" = "Gov_Agency_or_GSE",
+  "200" = "Comm_Bank",
+  "250" = "Non-dep_Trust",
+  "300" = "Sav_Bank",
+  "310" = "Sav_loan_Ass",
+  "320" = "Coop_Bank",
+  "330" = "Cred_Union",
+  "340" = "Ind_Bank",
+  "400" = "Agreem_Corp",
+  "500" = "Holding_Comp",
+  "550" = "Insurance",
+  "610" = "ESOP/ESOT",
+  "700" = "Sec_Broker/Dealer",
+  "710" = "Utility_Comp",
+  "720" = "Non-Dep_Institution",
+  "800" = "Pseudo_entity",
+  "810" = "Counting_machine",
+  "900" = "Group_of_ind"
+)
+# Replace numeric values in 'chartertype' with descriptive values using the lookup table
+dt[, RSSD9048 := ifelse(is.na(RSSD9048) | RSSD9048 == "0", "Not_known", 
+                           chartertype_lookup[RSSD9048])]
+```
+
+```{r}
+dt_aggregated <- dt[, c(lapply(.SD, sum, na.rm = TRUE), list(RSSD9048 = first(RSSD9048))), 
+                    by = .(date, bankid), .SDcols = numeric_cols]
+
+dt_aggregated <- dt_aggregated %>%
+  select(date, bankid, RSSD9048, everything())
+```
+
+See how many banks are in the dataset
+
+```{r}
+unique_bankid_count_agg <- dt_aggregated %>%
+  summarise(unique_bankid_count_agg = n_distinct(bankid))
+
+print(unique_bankid_count_agg)
+```
+The dataset includes a total of 9078 holding banks.
+
+As a further check, we look for duplicate entries, which gives result 0.
+
+```{r}
+# Check for multiple lines with the same dateq and bankid
+duplicate_entries <- dt_aggregated[, .N, by = .(date, bankid)][N > 1]
+
+# Display the duplicate entries
+print(duplicate_entries)
+```
+
+```{r}
+write.csv(
+  dt_aggregated,
+  file.path(output_dir, "Final_Dataset_Aggregated.csv"),
+  row.names = FALSE
+)
+```

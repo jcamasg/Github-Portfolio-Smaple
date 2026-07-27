@@ -1,0 +1,8 @@
+check,status,observed,expected
+cleaned_cells_nonempty,pass,8640,> 0
+production_grain_unique,pass,0,0
+warehouse_controls,pass,0,0 failures
+source_contract_available,pass,1,validation table produced
+output_contract_available,pass,0,validation table produced
+revision_diagnostics_nonempty,pass,18,> 0
+sha256_manifest,pass,64,64 characters

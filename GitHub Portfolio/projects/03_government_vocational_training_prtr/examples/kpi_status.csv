@@ -1,0 +1,6 @@
+kpi_id,name,numerator,denominator,unit,aggregation,target,direction,owner,evidence_table,actual,achieved,distance_to_target
+FP_01,Training places created,total_places_prtr,,places,sum,30000,at_least,education_policy,prtr_region_year,88537.0,True,58537.0
+FP_02,Green-axis place share,green_places_prtr,total_places_prtr,percent,ratio_of_sums,30,at_least,green_transition,prtr_region_year,38.45285022081164,True,8.45285022081164
+FP_03,Digital-axis place share,digital_places_prtr,total_places_prtr,percent,ratio_of_sums,22,at_least,digital_transition,prtr_region_year,25.187209867061227,True,3.1872098670612274
+FP_04,Investment execution,executed_investment_eur,committed_investment_eur,percent,ratio_of_sums,85,at_least,programme_management,prtr_region_year,85.68768759599438,True,0.687687595994376
+FP_05,Territorial coverage,CCAA,,regions,nunique,17,at_least,programme_management,prtr_region_year,17.0,True,0.0

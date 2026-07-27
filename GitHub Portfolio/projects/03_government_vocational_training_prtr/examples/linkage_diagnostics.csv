@@ -1,0 +1,2 @@
+observations,r_squared,outcome,lag_years,causal_design,main_limitation
+51,0.6216825691383643,change_green_share_pp,2,False,Regional allocation is not randomly assigned and parallel trends are not established.

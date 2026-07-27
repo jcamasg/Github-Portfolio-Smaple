@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vocational Training and PRTR Evaluation</title>
+  <style>
+    body {
+      margin: 0 auto;
+      max-width: 1100px;
+      padding: 32px;
+      color: #1d2939;
+      background: #f8fafc;
+      font-family: Arial, sans-serif;
+      line-height: 1.45;
+    }
+    .card {
+      background: white;
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+      margin: 18px 0;
+      padding: 20px;
+    }
+    .warning {
+      border-left: 5px solid #f79009;
+      background: #fffaeb;
+      padding: 12px 16px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border-bottom: 1px solid #e4e7ec; padding: 7px; }
+    th { background: #eef4ff; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>Vocational Training and PRTR Evaluation</h1>
+  <p>Jose Camas Garrdiow · independent synthetic research project.</p>
+  <div class="warning"><strong>Interpretation:</strong> simulated values only.
+  The t-to-t+2 regional exercise is descriptive and not causal.</div>
+  <section class="card"><h2>KPI status</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>kpi_id</th>
+      <th>name</th>
+      <th>actual</th>
+      <th>target</th>
+      <th>achieved</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FP_01</td>
+      <td>Training places created</td>
+      <td>88537.000000</td>
+      <td>30000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>FP_02</td>
+      <td>Green-axis place share</td>
+      <td>38.452850</td>
+      <td>30</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>FP_03</td>
+      <td>Digital-axis place share</td>
+      <td>25.187210</td>
+      <td>22</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>FP_04</td>
+      <td>Investment execution</td>
+      <td>85.687688</td>
+      <td>85</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>FP_05</td>
+      <td>Territorial coverage</td>
+      <td>17.000000</td>
+      <td>17</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table></section>
+  <section class="card"><h2>Latest FP indicators</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>ccaa_name</th>
+      <th>period</th>
+      <th>unemployment_rate_4q</th>
+      <th>employment_population_rate_4q</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Andalucía</td>
+      <td>2025Q3</td>
+      <td>49.50</td>
+      <td>35.49</td>
+    </tr>
+    <tr>
+      <td>Aragón</td>
+      <td>2025Q3</td>
+      <td>38.70</td>
+      <td>46.15</td>
+    </tr>
+    <tr>
+      <td>Asturias</td>
+      <td>2025Q3</td>
+      <td>41.31</td>
+      <td>41.77</td>
+    </tr>
+    <tr>
+      <td>Canarias</td>
+      <td>2025Q3</td>
+      <td>31.00</td>
+      <td>50.36</td>
+    </tr>
+    <tr>
+      <td>Cantabria</td>
+      <td>2025Q3</td>
+      <td>36.52</td>
+      <td>47.09</td>
+    </tr>
+    <tr>
+      <td>Castilla y León</td>
+      <td>2025Q3</td>
+      <td>35.64</td>
+      <td>47.31</td>
+    </tr>
+    <tr>
+      <td>Castilla-La Mancha</td>
+      <td>2025Q3</td>
+      <td>34.52</td>
+      <td>44.51</td>
+    </tr>
+    <tr>
+      <td>Cataluña</td>
+      <td>2025Q3</td>
+      <td>38.39</td>
+      <td>43.51</td>
+    </tr>
+    <tr>
+      <td>Comunidad de Madrid</td>
+      <td>2025Q3</td>
+      <td>32.49</td>
+      <td>44.51</td>
+    </tr>
+    <tr>
+      <td>Comunitat Valenciana</td>
+      <td>2025Q3</td>
+      <td>41.26</td>
+      <td>40.91</td>
+    </tr>
+    <tr>
+      <td>Extremadura</td>
+      <td>2025Q3</td>
+      <td>30.65</td>
+      <td>46.03</td>
+    </tr>
+    <tr>
+      <td>Galicia</td>
+      <td>2025Q3</td>
+      <td>34.21</td>
+      <td>47.89</td>
+    </tr>
+    <tr>
+      <td>Illes Balears</td>
+      <td>2025Q3</td>
+      <td>27.29</td>
+      <td>52.94</td>
+    </tr>
+    <tr>
+      <td>La Rioja</td>
+      <td>2025Q3</td>
+      <td>43.80</td>
+      <td>40.86</td>
+    </tr>
+    <tr>
+      <td>Navarra</td>
+      <td>2025Q3</td>
+      <td>43.59</td>
+      <td>42.86</td>
+    </tr>
+    <tr>
+      <td>País Vasco</td>
+      <td>2025Q3</td>
+      <td>40.97</td>
+      <td>42.40</td>
+    </tr>
+    <tr>
+      <td>Región de Murcia</td>
+      <td>2025Q3</td>
+      <td>45.63</td>
+      <td>37.70</td>
+    </tr>
+    <tr>
+      <td>Andalucía</td>
+      <td>2025Q4</td>
+      <td>43.28</td>
+      <td>40.46</td>
+    </tr>
+    <tr>
+      <td>Aragón</td>
+      <td>2025Q4</td>
+      <td>35.25</td>
+      <td>46.69</td>
+    </tr>
+    <tr>
+      <td>Asturias</td>
+      <td>2025Q4</td>
+      <td>36.67</td>
+      <td>42.90</td>
+    </tr>
+    <tr>
+      <td>Canarias</td>
+      <td>2025Q4</td>
+      <td>33.34</td>
+      <td>48.07</td>
+    </tr>
+    <tr>
+      <td>Cantabria</td>
+      <td>2025Q4</td>
+      <td>35.70</td>
+      <td>45.69</td>
+    </tr>
+    <tr>
+      <td>Castilla y León</td>
+      <td>2025Q4</td>
+      <td>36.38</td>
+      <td>45.50</td>
+    </tr>
+    <tr>
+      <td>Castilla-La Mancha</td>
+      <td>2025Q4</td>
+      <td>34.88</td>
+      <td>46.20</td>
+    </tr>
+    <tr>
+      <td>Cataluña</td>
+      <td>2025Q4</td>
+      <td>36.70</td>
+      <td>43.47</td>
+    </tr>
+    <tr>
+      <td>Comunidad de Madrid</td>
+      <td>2025Q4</td>
+      <td>38.02</td>
+      <td>43.29</td>
+    </tr>
+    <tr>
+      <td>Comunitat Valenciana</td>
+      <td>2025Q4</td>
+      <td>38.29</td>
+      <td>46.31</td>
+    </tr>
+    <tr>
+      <td>Extremadura</td>
+      <td>2025Q4</td>
+      <td>34.04</td>
+      <td>44.52</td>
+    </tr>
+    <tr>
+      <td>Galicia</td>
+      <td>2025Q4</td>
+      <td>32.76</td>
+      <td>49.26</td>
+    </tr>
+    <tr>
+      <td>Illes Balears</td>
+      <td>2025Q4</td>
+      <td>30.41</td>
+      <td>50.38</td>
+    </tr>
+    <tr>
+      <td>La Rioja</td>
+      <td>2025Q4</td>
+      <td>43.71</td>
+      <td>40.46</td>
+    </tr>
+    <tr>
+      <td>Navarra</td>
+      <td>2025Q4</td>
+      <td>43.89</td>
+      <td>41.47</td>
+    </tr>
+    <tr>
+      <td>País Vasco</td>
+      <td>2025Q4</td>
+      <td>31.40</td>
+      <td>45.01</td>
+    </tr>
+    <tr>
+      <td>Región de Murcia</td>
+      <td>2025Q4</td>
+      <td>36.00</td>
+      <td>46.72</td>
+    </tr>
+  </tbody>
+</table></section>
+  <section class="card"><h2>Territorial matching audit</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>reported_name</th>
+      <th>official_name</th>
+      <th>official_code</th>
+      <th>score</th>
+      <th>method</th>
+      <th>accepted</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Junta de Andalucía</td>
+      <td>Andalucía</td>
+      <td>1</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Andalucia</td>
+      <td>Andalucía</td>
+      <td>1</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Aragón</td>
+      <td>Aragón</td>
+      <td>2</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Asturias</td>
+      <td>Asturias</td>
+      <td>3</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Baleares</td>
+      <td>Illes Balears</td>
+      <td>4</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Illes Balears</td>
+      <td>Illes Balears</td>
+      <td>4</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Canarias</td>
+      <td>Canarias</td>
+      <td>5</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Cantabria</td>
+      <td>Cantabria</td>
+      <td>6</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Castilla-Leon</td>
+      <td>Castilla y León</td>
+      <td>7</td>
+      <td>0.928571</td>
+      <td>sequence_similarity</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Castilla y León</td>
+      <td>Castilla y León</td>
+      <td>7</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Castilla La Mancha</td>
+      <td>Castilla-La Mancha</td>
+      <td>8</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Castilla-La Mancha</td>
+      <td>Castilla-La Mancha</td>
+      <td>8</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Cataluña</td>
+      <td>Cataluña</td>
+      <td>9</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Comunidad Valenciana</td>
+      <td>Comunitat Valenciana</td>
+      <td>10</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>C. Valenciana</td>
+      <td>Comunitat Valenciana</td>
+      <td>10</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Extremadura</td>
+      <td>Extremadura</td>
+      <td>11</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Galicia</td>
+      <td>Galicia</td>
+      <td>12</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Madrid</td>
+      <td>Comunidad de Madrid</td>
+      <td>13</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Comunidad Madrid</td>
+      <td>Comunidad de Madrid</td>
+      <td>13</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Murcia</td>
+      <td>Región de Murcia</td>
+      <td>14</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Región Murcia</td>
+      <td>Región de Murcia</td>
+      <td>14</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Navarra</td>
+      <td>Navarra</td>
+      <td>15</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Pais Vasco</td>
+      <td>País Vasco</td>
+      <td>16</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>Euskadi</td>
+      <td>País Vasco</td>
+      <td>16</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>La Rioja</td>
+      <td>La Rioja</td>
+      <td>17</td>
+      <td>1.000000</td>
+      <td>normalised_exact_or_alias</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table></section>
+  <section class="card"><h2>Acceptance checks</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>project</th>
+      <th>check</th>
+      <th>status</th>
+      <th>observed</th>
+      <th>expected</th>
+      <th>detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>vocational_training</td>
+      <td>validation_has_no_failures</td>
+      <td>pass</td>
+      <td>0</td>
+      <td>0</td>
+      <td>All non-null and range rules must pass after source coercion.</td>
+    </tr>
+    <tr>
+      <td>vocational_training</td>
+      <td>weighted_population_identity</td>
+      <td>pass</td>
+      <td>0.0</td>
+      <td>&lt; 1e-8</td>
+      <td>Employed + unemployed + inactive equals the weighted population.</td>
+    </tr>
+    <tr>
+      <td>vocational_training</td>
+      <td>activity_shares_sum_to_100</td>
+      <td>pass</td>
+      <td>0.0</td>
+      <td>&lt; 1e-8</td>
+      <td>Activity shares use one unrepeated employed denominator.</td>
+    </tr>
+    <tr>
+      <td>vocational_training</td>
+      <td>territorial_matches_reviewed</td>
+      <td>pass</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>Every unique reported region has an accepted auditable match.</td>
+    </tr>
+    <tr>
+      <td>vocational_training</td>
+      <td>lagged_linkage_nonempty</td>
+      <td>pass</td>
+      <td>51</td>
+      <td>&gt; 0</td>
+      <td>PRTR years have both t and t+2 synthetic labour outcomes.</td>
+    </tr>
+    <tr>
+      <td>vocational_training</td>
+      <td>descriptive_design_labelled</td>
+      <td>pass</td>
+      <td>False</td>
+      <td>False</td>
+      <td>Regional correlations are not advertised as causal effects.</td>
+    </tr>
+    <tr>
+      <td>vocational_training_prtr</td>
+      <td>deterministic_seed</td>
+      <td>pass</td>
+      <td>7eff8797b91a7f0516a738c0963da3a7f77ac32bc54007bdc5fe9c3d573c417d</td>
+      <td>7eff8797b91a7f0516a738c0963da3a7f77ac32bc54007bdc5fe9c3d573c417d</td>
+      <td>Repeated runs create identical KPI evidence.</td>
+    </tr>
+  </tbody>
+</table></section>
+</body>
+</html>

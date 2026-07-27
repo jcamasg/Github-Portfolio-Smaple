@@ -1,0 +1,8 @@
+project,check,status,observed,expected,detail
+vocational_training,validation_has_no_failures,pass,0,0,All non-null and range rules must pass after source coercion.
+vocational_training,weighted_population_identity,pass,1.0913936421275139e-11,< 1e-8,Employed + unemployed + inactive equals the weighted population.
+vocational_training,activity_shares_sum_to_100,pass,2.842170943040401e-14,< 1e-8,Activity shares use one unrepeated employed denominator.
+vocational_training,territorial_matches_reviewed,pass,1.0,1.0,Every unique reported region has an accepted auditable match.
+vocational_training,lagged_linkage_nonempty,pass,51,> 0,PRTR years have both t and t+2 synthetic labour outcomes.
+vocational_training,descriptive_design_labelled,pass,False,False,Regional correlations are not advertised as causal effects.
+vocational_training_prtr,deterministic_seed,pass,7eff8797b91a7f0516a738c0963da3a7f77ac32bc54007bdc5fe9c3d573c417d,7eff8797b91a7f0516a738c0963da3a7f77ac32bc54007bdc5fe9c3d573c417d,Repeated runs create identical KPI evidence.

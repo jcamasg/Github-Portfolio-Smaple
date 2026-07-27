@@ -1,0 +1,8 @@
+check,status,observed,expected
+source_keys_and_coverage,pass,0,0 failures
+monthly_panel_nonempty,pass,1440,> 0
+ecm_adjustment_term,pass,1,1
+asymmetric_pass_through_terms,pass,17,positive and negative terms
+local_projection_horizons,pass,"[np.int64(0), np.int64(1), np.int64(2), np.int64(3), np.int64(4), np.int64(5), np.int64(6), np.int64(7), np.int64(8), np.int64(9), np.int64(10), np.int64(11), np.int64(12)]",0 through 12
+panel_coefficients_finite,pass,True,True
+var_responses_nonempty,pass,76,> 0

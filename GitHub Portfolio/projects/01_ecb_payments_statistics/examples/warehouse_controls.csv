@@ -1,0 +1,6 @@
+control,failures,status
+orphan_psp,0,pass
+negative_amount,0,pass
+invalid_quarter,0,pass
+duplicate_grain,0,pass
+instrument_share_outside_unit_interval,0,pass
