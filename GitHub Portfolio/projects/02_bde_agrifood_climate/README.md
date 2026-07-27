@@ -1,6 +1,6 @@
 # Agri-food Price Transmission and Climate Risk
 
-**Author: Jose Camas Garrdiow**
+**Author: Jose Camas Garrido**
 
 An independent econometric project inspired by research assistance in the
 International Economics and Euro Area Division of Banco de España. It studies
